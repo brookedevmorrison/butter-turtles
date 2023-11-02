@@ -4,15 +4,13 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 /// <summary>
-/// Morrison, Brooke
-/// Melendrez, Servando
+/// Morrison, Brooke & Melendrez, Servando
 /// 10/31/23
 /// This script controls the full movment of the player. Also controls collisions
 /// </summary>
 public class playerController : MonoBehaviour
 {
     public float speed = 10f;
-   // public int totalCoins = 0;
     private Rigidbody rigidbodyRef;
     public float jumpForce = 10f;
     public float deathYLevel = -3;
@@ -21,7 +19,8 @@ public class playerController : MonoBehaviour
     private Vector3 startPos;
     private bool jetpackCollected = false;
     private bool doubleJump = false;
-   // public bool stunned = false;
+    private bool canTakeDamage = true;
+    public bool isGroundedtoFloor;
 
     // Start is called before the first frame update
     void Start()
@@ -49,46 +48,63 @@ public class playerController : MonoBehaviour
             {
                 transform.position += Vector3.right * speed * Time.deltaTime;
             }
-
-            //jumping
-            if(isGrounded() && !Input.GetKey(KeyCode.Space))
-            {
-             doubleJump = false; 
-            }
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 HandleJump();
             }
 
-            if (transform.position.y <= deathYLevel)
+           /* if (transform.position.y <= deathYLevel)
             {
                 Respawn();
-            }
+            }*/
 
-            CheckForDamage();
+            //CheckForDamage();
         }
     
 
-    private void Respawn()
+  /*  private void Respawn()
     {
-        //teleport the player to the starting position
-        //cause the player to lose a life
-
-        lives--;
-        transform.position = startPos;
-
-        if (lives == 0)
+        if (canTakeDamage == true)
         {
-            //add code to end the game by loading the game over scene
-            SceneManager.LoadScene(2);  //change scene number later
-            Debug.Log("Game Ends");
+
+
+            //teleport the player to the starting position
+            //cause the player to lose a life
+
+            lives--;
+            transform.position = startPos;
+
+            StartCoroutine(SetInvincibility());
+
+            if (lives == 0)
+            {
+                //add code to end the game by loading the game over scene
+                SceneManager.LoadScene(2);  //change scene number later
+                Debug.Log("Game Ends");
+            }
         }
 
+    }*/
+
+    private void Die()
+    {
+        if(canTakeDamage == true)
+        {
+
+              StartCoroutine(SetInvincibility());
+
+            if (totalHealth == 0)
+            {
+                //add code to end the game by loading the game over scene
+                SceneManager.LoadScene(2);  //change scene number later
+                Debug.Log("Game Ends");
+            }
+        }
     }
     /// <summary>
     /// check to see if a thwomp hits the player from the top
     /// </summary>
-    private void CheckForDamage()
+  /*  private void CheckForDamage()
     {
         RaycastHit hit;
         //raycast upwards and check the raycast will return true if it hits an object
@@ -101,48 +117,43 @@ public class playerController : MonoBehaviour
                 Respawn();
             }
         }
-    }
-    private bool isGrounded()
+    }*/
+   /* private bool isGrounded()
     {
         RaycastHit hit;
         Physics.Raycast(transform.position, Vector3.down, out hit, 1.3f);
         return true;
-    }
+
+    }*/
     /// <summary>
     /// makes sure the player is touching the ground before they are allowed to jump
     /// </summary>
     private void HandleJump()
     {
-        
-      
-            if (isGrounded() || doubleJump)
-            {
-                rigidbodyRef.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                doubleJump = !doubleJump;
-            }
-  
-
-
-
-
-
-    /*
-        if (isGrounded() && !Input.GetKey(KeyCode.Space))
+        RaycastHit Hit;
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out Hit, 1.5f))
         {
-            Debug.Log("Player is touching to ground so jump");
-            rigidbodyRef.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            if (doubleJump == false && jetpackCollected == true)
-            {
-                doubleJump = true;
-                Debug.Log("Player has jetpack so double jump is enabled.");
-                rigidbodyRef.AddForce(Vector3.up * (jumpForce + 2), ForceMode.Impulse);
-            }
+            isGroundedtoFloor = true;
+            Debug.Log("single jumping");
         }
         else
         {
-            Debug.Log("Player is not touching to ground so they cannot jump");
+            isGroundedtoFloor = false;
+            Debug.Log("not grounded");
         }
-       */
+
+        if((Input.GetKeyDown(KeyCode.Space) && isGroundedtoFloor == true) && !jetpackCollected)
+        {
+            rigidbodyRef.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && (isGroundedtoFloor || doubleJump) && jetpackCollected)
+            {
+                rigidbodyRef.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            Debug.Log("jetpack jump " + doubleJump);
+            doubleJump = !doubleJump;
+            
+            }
     }
     /// <summary>
     /// makes the coins add to the total coin value and causes them to dissapear afterwards
@@ -161,13 +172,23 @@ public class playerController : MonoBehaviour
             jetpackCollected = true;
             Destroy(other.gameObject);
         }
-        if (other.gameObject.tag == "bullet")
+        if(other.gameObject.tag == "enemy")
         {
-            Respawn();
+            totalHealth -= 15f;
+        
+        }
+        if(other.gameObject.tag == "bossenemy")
+        {
+            totalHealth -= 35f;
         }
     }
     
-
+    IEnumerator SetInvincibility()
+    {
+        canTakeDamage = false;
+        yield return new WaitForSeconds(5f);
+        canTakeDamage = true;
+    }
 
 }
 

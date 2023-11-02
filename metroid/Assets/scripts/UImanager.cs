@@ -12,7 +12,7 @@ public class UImanager : MonoBehaviour
 {
     public playerController playerController;
     public TMP_Text healthDisplay;
-    public TMP_Text livesDisplay;
+    //public TMP_Text livesDisplay;
 
 
     // Start is called before the first frame update
@@ -27,6 +27,6 @@ public class UImanager : MonoBehaviour
     void Update()
     {
         healthDisplay.text = "Health: " + playerController.totalHealth;
-        livesDisplay.text = "Lives: " + playerController.lives;
+       // livesDisplay.text = "Lives: " + playerController.lives;
     }
 }
