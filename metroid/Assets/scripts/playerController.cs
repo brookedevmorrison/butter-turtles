@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 /// <summary>
 /// Morrison, Brooke
+/// Melendrez, Servando
 /// 10/31/23
 /// This script controls the full movment of the player. Also controls collisions
 /// </summary>
@@ -50,6 +51,10 @@ public class playerController : MonoBehaviour
             }
 
             //jumping
+            if(isGrounded() && !Input.GetKey(KeyCode.Space))
+            {
+             doubleJump = false; 
+            }
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 HandleJump();
@@ -109,7 +114,19 @@ public class playerController : MonoBehaviour
     private void HandleJump()
     {
         
+      
+            if (isGrounded() || doubleJump)
+            {
+                rigidbodyRef.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                doubleJump = !doubleJump;
+            }
+  
 
+
+
+
+
+    /*
         if (isGrounded() && !Input.GetKey(KeyCode.Space))
         {
             Debug.Log("Player is touching to ground so jump");
@@ -125,7 +142,7 @@ public class playerController : MonoBehaviour
         {
             Debug.Log("Player is not touching to ground so they cannot jump");
         }
-
+       */
     }
     /// <summary>
     /// makes the coins add to the total coin value and causes them to dissapear afterwards
