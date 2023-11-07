@@ -8,15 +8,18 @@ TagManager:
   - portal
   - enemy
   - bossenemy
+  - player
+  - bullet
+  - Wall
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PlayerLayer
   - Water
   - UI
-  - 
-  - 
+  - Bullet
+  - Wall
   - 
   - 
   - 

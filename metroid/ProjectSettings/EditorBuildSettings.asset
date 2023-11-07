@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/brooke's level 1.unity
+    guid: b11c8fb8cebd1ec4b88db0883d4cfe49
+  - enabled: 1
+    path: Assets/Scenes/Game Over.unity
+    guid: 744a1bacadb2d8842bab715a75c9d5c3
   m_configObjects: {}

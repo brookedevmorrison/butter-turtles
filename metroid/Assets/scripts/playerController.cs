@@ -19,9 +19,14 @@ public class playerController : MonoBehaviour
     private Vector3 startPos;
     private bool jetpackCollected = false;
     private bool doubleJump = false;
-    private bool canTakeDamage = true;
+    private bool canTakeDamage = false;
+    private Renderer[] renderers;
     public bool isGroundedtoFloor;
-
+    private bool isFacingLeft = false;
+    //Shooting Variables
+    public GameObject Bullet;
+    public bool shootRight = true;
+    private bool canShoot = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -30,6 +35,12 @@ public class playerController : MonoBehaviour
 
         //set the statrting position
         startPos = transform.position;
+        // Get the Renderer components of the player and its children
+        renderers = GetComponentsInChildren<Renderer>();
+        // Ensure that all renderers are initially visible
+        SetRenderersVisibility(true);
+        // Set canTakeDamage to true after initializing renderers
+        canTakeDamage = true;
     }
 
 
@@ -37,22 +48,41 @@ public class playerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-            //side to side player movement
-            if (Input.GetKey(KeyCode.A))
-            {
-                transform.position += Vector3.left * speed * Time.deltaTime;
-            }
 
-            if (Input.GetKey(KeyCode.D))
+        //side to side player movement
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        {
+            if (!isFacingLeft) // Check if the player is not already facing left
             {
-                transform.position += Vector3.right * speed * Time.deltaTime;
+                isFacingLeft = true;
+                RotatePlayerModel(-90f); // Rotate the player model 180 degrees on the X-axis
+               
             }
-            if (Input.GetKeyDown(KeyCode.Space))
+            shootRight = false;
+            // Handle player movement to the left
+            transform.position += Vector3.left * speed * Time.deltaTime;
+        }
+        else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        {
+            if (isFacingLeft) // Check if the player is not already facing right
+            {
+                isFacingLeft = false;
+                RotatePlayerModel(90f); // Rotate the player model back to its original rotation
+               
+            }
+            shootRight = true;
+            // Handle player movement to the right
+            transform.position += Vector3.right * speed * Time.deltaTime;
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
             {
                 HandleJump();
             }
-
+        if (Input.GetKeyDown(KeyCode.Return) && canShoot)
+        {
+            StartCoroutine(ShootWithDelay());
+        }
+        Die();
            /* if (transform.position.y <= deathYLevel)
             {
                 Respawn();
@@ -60,7 +90,24 @@ public class playerController : MonoBehaviour
 
             //CheckForDamage();
         }
-    
+    /// <summary>
+    /// Shoots bullet
+    /// </summary>
+        private void ShootBullet()
+    {
+        GameObject bulletInstance = Instantiate(Bullet, transform.position, Quaternion.Euler(0, 0, 0));
+        bulletInstance.GetComponent<Bullet>().goingRight = shootRight;
+
+    }
+    private IEnumerator ShootWithDelay()
+    {
+        canShoot = false; // Disable shooting
+        ShootBullet();
+
+        yield return new WaitForSeconds(0.5f); // 0.5-second delay
+
+        canShoot = true; // Enable shooting after the delay
+    }
 
   /*  private void Respawn()
     {
@@ -88,43 +135,52 @@ public class playerController : MonoBehaviour
 
     private void Die()
     {
-        if(canTakeDamage == true)
-        {
-
-              StartCoroutine(SetInvincibility());
-
-            if (totalHealth == 0)
+            if (totalHealth <= 0f)
             {
                 //add code to end the game by loading the game over scene
-                SceneManager.LoadScene(2);  //change scene number later
+                SceneManager.LoadScene(1);  //change scene number later
                 Debug.Log("Game Ends");
             }
+    }
+
+    private void Blink()
+    {
+        if (canTakeDamage) 
+        {
+                StartCoroutine(SetInvincibility());
         }
+    }
+    // Rotate the player model on the X-axis
+    private void RotatePlayerModel(float angle)
+    {
+        Vector3 currentRotation = transform.rotation.eulerAngles;
+        currentRotation.y = angle;
+        transform.rotation = Quaternion.Euler(currentRotation);
     }
     /// <summary>
     /// check to see if a thwomp hits the player from the top
     /// </summary>
-  /*  private void CheckForDamage()
-    {
-        RaycastHit hit;
-        //raycast upwards and check the raycast will return true if it hits an object
-        //raycast(startPost, direction, output hit, distance for ray);
-        if (Physics.Raycast(transform.position, Vector3.up, out hit, 1))
-        {
-            //check to see if the object hitting the player is a thwomp
-            if (hit.collider.tag == "thwomp")
-            {
-                Respawn();
-            }
-        }
-    }*/
-   /* private bool isGrounded()
-    {
-        RaycastHit hit;
-        Physics.Raycast(transform.position, Vector3.down, out hit, 1.3f);
-        return true;
+    /*  private void CheckForDamage()
+      {
+          RaycastHit hit;
+          //raycast upwards and check the raycast will return true if it hits an object
+          //raycast(startPost, direction, output hit, distance for ray);
+          if (Physics.Raycast(transform.position, Vector3.up, out hit, 1))
+          {
+              //check to see if the object hitting the player is a thwomp
+              if (hit.collider.tag == "thwomp")
+              {
+                  Respawn();
+              }
+          }
+      }*/
+    /* private bool isGrounded()
+     {
+         RaycastHit hit;
+         Physics.Raycast(transform.position, Vector3.down, out hit, 1.3f);
+         return true;
 
-    }*/
+     }*/
     /// <summary>
     /// makes sure the player is touching the ground before they are allowed to jump
     /// </summary>
@@ -172,23 +228,66 @@ public class playerController : MonoBehaviour
             jetpackCollected = true;
             Destroy(other.gameObject);
         }
-        if(other.gameObject.tag == "enemy")
+        if(other.gameObject.tag == "enemy" && canTakeDamage)
         {
             totalHealth -= 15f;
+            Blink();
         
         }
-        if(other.gameObject.tag == "bossenemy")
+        if(other.gameObject.tag == "bossenemy" && canTakeDamage)
         {
             totalHealth -= 35f;
+            Blink();
         }
     }
-    
+
     IEnumerator SetInvincibility()
     {
         canTakeDamage = false;
-        yield return new WaitForSeconds(5f);
+
+        // Blink duration and blink speed settings
+        float blinkDuration = 5f;
+        float blinkSpeed = 0.2f;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < blinkDuration)
+        {
+            SetRenderersVisibility(!AreRenderersVisible()); // Toggle visibility of all renderers
+            yield return new WaitForSeconds(blinkSpeed);
+            elapsedTime += blinkSpeed;
+        }
+
+        SetRenderersVisibility(true); // Ensure all renderers are visible at the end
         canTakeDamage = true;
     }
 
+    /// <summary>
+    /// Sets the visibility of all renderers
+    /// </summary>
+    /// <param name="visible"></param>
+    private void SetRenderersVisibility(bool visible)
+    {
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.enabled = visible;
+        }
+    }
+
+    /// <summary>
+    /// Checks if any renderer is currently visible
+    /// </summary>
+    /// <returns></returns>
+    private bool AreRenderersVisible()
+    {
+        foreach (Renderer renderer in renderers)
+        {
+            if (renderer.enabled)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
