@@ -1,7 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Morrison,Brooke 
+/// Melendrez, Servando
+/// 11/7/23
+/// This script controls the bullets that the player shoots 
+/// </summary>
 public class Bullet : MonoBehaviour
 {
     public float speed;

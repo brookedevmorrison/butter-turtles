@@ -11,6 +11,7 @@ TagManager:
   - player
   - bullet
   - Wall
+  - waypoint
   layers:
   - Default
   - TransparentFX

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 /// <summary>
-/// Morrison, Brooke
+/// Morrison, Brooke and Melendrez, Servando
 /// 10/31/23
 /// This script controls the enemy's movement from side to side
 /// </summary>

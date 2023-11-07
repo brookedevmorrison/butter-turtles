@@ -13,8 +13,6 @@ public class playerController : MonoBehaviour
     public float speed = 10f;
     private Rigidbody rigidbodyRef;
     public float jumpForce = 10f;
-    public float deathYLevel = -3;
-    public int lives = 3;
     public float totalHealth = 99f;
     private Vector3 startPos;
     private bool jetpackCollected = false;
@@ -27,6 +25,11 @@ public class playerController : MonoBehaviour
     public GameObject Bullet;
     public bool shootRight = true;
     private bool canShoot = true;
+
+    //waypoint gameobject for hard enemy script
+    public GameObject waypoint;
+    public float timer = 0.5f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -48,7 +51,16 @@ public class playerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (timer > 0)
+        {
+            timer -= Time.deltaTime;
+        }
+        if (timer <= 0)
+        {
+            //The position of the waypoint will update to the player's position
+            UpdatePosition();
+            timer = 0.5f;
+        }
         //side to side player movement
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
@@ -83,15 +95,16 @@ public class playerController : MonoBehaviour
             StartCoroutine(ShootWithDelay());
         }
         Die();
-           /* if (transform.position.y <= deathYLevel)
-            {
-                Respawn();
-            }*/
-
-            //CheckForDamage();
         }
+
+        private void UpdatePosition()
+         {
+        //The wayPoint's position will now be the player's current position.
+         waypoint.transform.position = transform.position;
+    }
+
     /// <summary>
-    /// Shoots bullet
+    /// Spawns bullet directly from the player and destroys it after a certain amount of seconds has passed
     /// </summary>
         private void ShootBullet()
     {
@@ -108,30 +121,6 @@ public class playerController : MonoBehaviour
 
         canShoot = true; // Enable shooting after the delay
     }
-
-  /*  private void Respawn()
-    {
-        if (canTakeDamage == true)
-        {
-
-
-            //teleport the player to the starting position
-            //cause the player to lose a life
-
-            lives--;
-            transform.position = startPos;
-
-            StartCoroutine(SetInvincibility());
-
-            if (lives == 0)
-            {
-                //add code to end the game by loading the game over scene
-                SceneManager.LoadScene(2);  //change scene number later
-                Debug.Log("Game Ends");
-            }
-        }
-
-    }*/
 
     private void Die()
     {
@@ -157,30 +146,7 @@ public class playerController : MonoBehaviour
         currentRotation.y = angle;
         transform.rotation = Quaternion.Euler(currentRotation);
     }
-    /// <summary>
-    /// check to see if a thwomp hits the player from the top
-    /// </summary>
-    /*  private void CheckForDamage()
-      {
-          RaycastHit hit;
-          //raycast upwards and check the raycast will return true if it hits an object
-          //raycast(startPost, direction, output hit, distance for ray);
-          if (Physics.Raycast(transform.position, Vector3.up, out hit, 1))
-          {
-              //check to see if the object hitting the player is a thwomp
-              if (hit.collider.tag == "thwomp")
-              {
-                  Respawn();
-              }
-          }
-      }*/
-    /* private bool isGrounded()
-     {
-         RaycastHit hit;
-         Physics.Raycast(transform.position, Vector3.down, out hit, 1.3f);
-         return true;
-
-     }*/
+    
     /// <summary>
     /// makes sure the player is touching the ground before they are allowed to jump
     /// </summary>
@@ -212,7 +178,7 @@ public class playerController : MonoBehaviour
             }
     }
     /// <summary>
-    /// makes the coins add to the total coin value and causes them to dissapear afterwards
+    /// makes stuff happen when you hit certain tagged objects
     /// </summary>
     /// <param name="other">The object that is being collided with</param>
     private void OnTriggerEnter(Collider other)
