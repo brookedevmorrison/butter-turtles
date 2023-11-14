@@ -6,6 +6,7 @@ using UnityEngine;
 /// Melendrez, Servando
 /// 11/7/23
 /// This script makes the camera have dynamic panning
+/// Our own element to the game
 /// </summary>
 public class cameraFollow : MonoBehaviour
 {

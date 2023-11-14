@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Morrison,Brooke and Melendrez, Servando
@@ -10,6 +10,5 @@ using UnityEngine;
 /// </summary>
 public class portal : MonoBehaviour
 {
-    public GameObject teleportPoint;
-
+    public GameObject teleportPoint;  
 }

@@ -12,6 +12,10 @@ TagManager:
   - bullet
   - Wall
   - waypoint
+  - Win
+  - bulletpickup
+  - Healthpack
+  - Extrahealth
   layers:
   - Default
   - TransparentFX

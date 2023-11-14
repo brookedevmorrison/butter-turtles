@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 /// Morrison, Brooke & Melendrez, Servando
 /// 10/31/23
 /// This script controls the full movment of the player. Also controls collisions
+/// Our Camera Follow Script is our own element
 /// </summary>
 public class playerController : MonoBehaviour
 {
@@ -14,16 +15,20 @@ public class playerController : MonoBehaviour
     private Rigidbody rigidbodyRef;
     public float jumpForce = 10f;
     public float totalHealth = 99f;
+    public float maxHealth = 99f;
+    public float healthVal = 50f; 
     private Vector3 startPos;
     private bool jetpackCollected = false;
     private bool doubleJump = false;
     private bool canTakeDamage = false;
     private Renderer[] renderers;
-    public bool isGroundedtoFloor;
+    private bool isGroundedtoFloor;
     private bool isFacingLeft = false;
     //Shooting Variables
     public GameObject Bullet;
-    public bool shootRight = true;
+    public GameObject HeavyBullet;
+    private bool heavybulletOn = false;
+    private bool shootRight = true;
     private bool canShoot = true;
 
     //waypoint gameobject for hard enemy script
@@ -96,7 +101,9 @@ public class playerController : MonoBehaviour
         }
         Die();
         }
-
+    /// <summary>
+    /// Helps the Boss Enemys ai detect player
+    /// </summary>
         private void UpdatePosition()
          {
         //The wayPoint's position will now be the player's current position.
@@ -108,10 +115,22 @@ public class playerController : MonoBehaviour
     /// </summary>
         private void ShootBullet()
     {
-        GameObject bulletInstance = Instantiate(Bullet, transform.position, Quaternion.Euler(0, 0, 0));
-        bulletInstance.GetComponent<Bullet>().goingRight = shootRight;
+        if(heavybulletOn == true)
+        {
+            GameObject bulletInstance = Instantiate(HeavyBullet, transform.position, Quaternion.Euler(0, 0, 0));
+            bulletInstance.GetComponent<Bullet>().goingRight = shootRight;
+        }
+        else
+        {
+            GameObject bulletInstance = Instantiate(Bullet, transform.position, Quaternion.Euler(0, 0, 0));
+            bulletInstance.GetComponent<Bullet>().goingRight = shootRight;
+        }
 
     }
+    /// <summary>
+    /// Adds a delay to shooting
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator ShootWithDelay()
     {
         canShoot = false; // Disable shooting
@@ -121,17 +140,21 @@ public class playerController : MonoBehaviour
 
         canShoot = true; // Enable shooting after the delay
     }
-
+    /// <summary>
+    /// Game Over when Health Drops to 0
+    /// </summary>
     private void Die()
     {
             if (totalHealth <= 0f)
             {
                 //add code to end the game by loading the game over scene
-                SceneManager.LoadScene(1);  //change scene number later
+                SceneManager.LoadScene(2);  //change scene number later
                 Debug.Log("Game Ends");
             }
     }
-
+    /// <summary>
+    /// Makes character blink 
+    /// </summary>
     private void Blink()
     {
         if (canTakeDamage) 
@@ -205,8 +228,35 @@ public class playerController : MonoBehaviour
             totalHealth -= 35f;
             Blink();
         }
+        if(other.gameObject.tag == "Win")
+        { 
+                    SceneManager.LoadScene(3);
+        }
+        if(other.gameObject.tag == "bulletpickup")
+        {
+            heavybulletOn = true;
+            Destroy(other.gameObject);
+        }
+        if(other.gameObject.tag == "Healthpack")
+        {
+            totalHealth += healthVal; 
+            if(totalHealth >= maxHealth)
+            {
+                totalHealth = maxHealth; 
+            }
+            Destroy(other.gameObject);
+        }
+        if(other.gameObject.tag == "Extrahealth")
+        {
+            maxHealth = 199f; 
+            totalHealth = maxHealth;
+            Destroy(other.gameObject);
+        }
     }
-
+    /// <summary>
+    /// Controls Blinking and Invinicibility
+    /// </summary>
+    /// <returns></returns>
     IEnumerator SetInvincibility()
     {
         canTakeDamage = false;

@@ -449,12 +449,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 10
   jumpForce: 10
-  deathYLevel: -3
-  lives: 3
   totalHealth: 99
   isGroundedtoFloor: 0
   Bullet: {fileID: 3995816097786920840, guid: 99757c2f82a090e4da6dff36303eb77a, type: 3}
+  HeavyBullet: {fileID: 2214378690452779788, guid: afca036a5eeb98244b687a250c30216b, type: 3}
+  heavybulletOn: 0
   shootRight: 1
+  waypoint: {fileID: 0}
+  timer: 0.5
 --- !u!54 &7751666879436083654
 Rigidbody:
   m_ObjectHideFlags: 0
